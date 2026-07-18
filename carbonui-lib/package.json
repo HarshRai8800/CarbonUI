@@ -1,0 +1,22 @@
+{
+  "name": "carbon-ui-library",
+  "version": "1.0.1",
+  "description": "Carbon UI React Component Library",
+  "license": "ISC",
+  "author": "Harsh",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}
