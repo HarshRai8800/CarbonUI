@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react';
-import { FiAlertCircle, FiArrowRight, FiCheckCircle,FiCpu, FiLoader, FiPlus, FiZap } from "react-icons/fi"
+import { FiAlertCircle, FiArrowLeft, FiArrowRight, FiCheckCircle,FiCode,FiCpu, FiEye, FiLayers, FiLoader, FiPackage, FiPlus, FiRefreshCcw, FiSave, FiUploadCloud, FiZap } from "react-icons/fi"
 import {TbX} from "react-icons/tb"
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios"
 import {ServerUrl} from "../App.jsx"
 import { setUserData } from '../redux/userSlice';
+import LiveComponentPreview from '../components/LiveComponentPreview.jsx';
 
 const Toast = ({message,type,onClose})=>{
   return (
@@ -37,15 +38,22 @@ const Toast = ({message,type,onClose})=>{
 function Generate() {
 
   const {userData} = useSelector((state)=>state.user)
-  const userRole = userData.role
-  const aiCredits = userData.aicredits
+  const userRole = userData?.role
+  const aiCredits = userData?.aicredits;
   const lowCredits = userRole ==='user' && aiCredits< 50
   const navigate = useNavigate()
+  const [activeTab,setActiveTab] = useState("preview")
+  const [savedComponentId,setSavedComponentId] = useState(null);
+  const [saving,setSaving] = useState(false);
+  const [publishing,setPublishing] = useState(false);
+  const [published,setPublished] = useState(false);
+
 
   const showToast = (message,type="info")=>{
     setToast({message,type});
     setTimeout(()=>setToast(null),3500);
   }
+
   const [prompt,setPrompt] = useState("")
   const [generated,setGenerated] = useState(null);
   const [generating,setGenerating] = useState(false);
@@ -57,12 +65,13 @@ function Generate() {
       if(!prompt.trim() || lowCredits)return
       setGenerated(null)
       setGenerating(true)
+
       const {data} = await axios.post(ServerUrl+"/api/component/generate",
         {prompt},{withCredentials:true})
         console.log(data.parsed)
         setGenerated(data.parsed)
         dispatch(setUserData(
-         { ...userData,aiCredits :data.remainingCredits}
+         { ...userData,aicredits :data.remainingCredits}
         ))
         setGenerating(false);
         showToast("AI Component Generated","success")
@@ -75,6 +84,48 @@ function Generate() {
   const handleKeyDown = (e)=>{
     if(e.key ==="Enter"&& (e.ctrlKey || e.metaKey)){
       handleGenerate();
+    }
+  }
+
+  const handleSave =async ()=>{
+    if(!generated)return 
+     setSaving(true)
+     try{
+      const res = await axios.post(ServerUrl + "/api/component/save",{
+        name:generated.name,
+        code:generated.code,
+        props:generated.props
+      },{withCredentials:true})
+      console.log(res.data)
+      setSavedComponentId(res.data._id)
+
+      showToast("Component saved successfully!","success");
+      setSaving(false)
+     }
+     catch(err){
+      console.log(err);
+      showToast("Component saved Error","error");
+      setSaving(false);
+     }
+  }
+
+  const handlePublished = async()=>{
+    if(!savedComponentId)return;
+    setPublishing(true)
+    try {
+      await axios.post(ServerUrl + "/api/component/publish",
+        {componentId:savedComponentId},{withCredentials:true}
+      )
+      setPublished(true)
+      setPublishing(false);
+      showToast("Published to npm successfully!","success");
+      setSaving(false)
+    } catch (error) {
+      console.log(error)
+      setPublished(false)
+      setPublishing(false);
+      showToast("Published Failed!","error");
+      setSaving(false)
     }
   }
 
@@ -137,7 +188,7 @@ function Generate() {
 
               <p className='text-white/40 text-base max-w-md mx-auto'>
               Describe your React component in pain English. Preview, save, and publish
-              -all in one place.
+              - all in one place.
               </p>
             </motion.div>
 
@@ -184,7 +235,7 @@ function Generate() {
               }}              
               >
                 <FiAlertCircle size={16} className='text-red-400 shrink-0'/>
-                <p className='text-sm text-sm text-red-300'>
+                <p className='text-sm  text-red-300'>
                   You need at least <span className='font-bold text-red-400'>
                     500 credits 
                   </span> to generate a component.
@@ -236,6 +287,7 @@ function Generate() {
                 <motion.button
                 whileTap={{scale:0.97}}
                 disabled={generating || lowCredits || !prompt.trim()}
+                onClick={handleGenerate}
                 className='flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold
                 disabled:opacity-40 disabled:cursor-not-allowed transition-all'
                 style={{background:generating? "rgba(99,102,241,0.3)":
@@ -260,6 +312,340 @@ function Generate() {
             </motion.div>
 
           </div>
+                  <AnimatePresence>
+                  {generated &&(
+                    <motion.div
+                    initial={{opacity:0,y:30}}
+                    animate={{opacity:1,y:0}}
+                    exit={{opacity:0,y:30}}
+                    className='rounded-2xl overflow-hidden'
+                    style={{background:"rgba(255,255,255,0.03)",
+                      border:"1px solid rgba(255,255,255,0.08)"
+                    }}
+                    >
+                      <div className='flex items-center justify-between
+                      px-5 py-4 border-b'
+                      style={{borderColor:"rgba(255,255,255,0.06)"}}
+                      >
+
+
+                        <div className='flex items-center gap-3'>
+                        <div className='w-8 h-8 rounded-lg flex items-center 
+                        justify-center' style={{background:"rgba(99,102,241,0.2)"}}>
+
+                          <FiLayers size={14} className='text-indigo-400'/>
+                        </div>
+                        <div >
+                          <p className='text-sm font-semibold text-white'>
+                            {generated.name}
+                          </p>
+                          <p className='text-xs text-white/30'>
+                          {generated.props?.length>0 ?`Props: ${generated.props.
+                          join(", ")}`:"No props"}
+                          </p>
+                        </div>
+                        </div>
+
+                        <div className='flex gap-1 rounded-xl p-1'
+                        style={{background:"rgba(0,0,0,0.3)"}}>
+
+                          {["preview","code"].map((tab)=>(
+                            <button key={tab} onClick={()=>setActiveTab(tab)}
+                            className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs
+                            font-medium
+                            transition-all capitalize'
+                            style={{
+                              background:activeTab===tab? "rgba(99,102,241,0.5)":
+                              "transparent",
+                              color:activeTab===tab?"#fff" :"rgba(255,255,255,0.4)",
+                            }}>
+                              {tab==='preview'?<FiEye size={12}/>:<FiCode size={12}/>}                            
+                            </button>
+                          ))}
+                        </div>
+
+
+                      </div>
+                          
+                      <div className='p-5'>
+                      <AnimatePresence mode='wait'>
+                      {activeTab==="preview"?(
+                        <motion.div
+                        initial={{opacity:0}}
+                        animate={{opacity:1}}
+                        exit={{opacity:0}}
+                        key="preview"
+                        >
+                          {generated?.code &&(
+                            <LiveComponentPreview code={generated.code}/>
+                          )}
+
+                        </motion.div>
+                      ):
+                      (
+                        <motion.div
+                         initial={{opacity:0}}
+                        animate={{opacity:1}}
+                        exit={{opacity:0}}
+                        key="code"
+                        className='rounded-xl overflow-auto'
+                        style={{background:"#0d1117",border:"1px solid rgba(255,255,255,0.06)",
+                          maxHeight:"340px"
+                        }}
+                        >
+
+                          <pre className='p-5 text-xs leading-relaxed text-green-300
+                          font-mono whitespace-pre-wrap'>
+                            {generated.code}
+                          </pre>
+                        </motion.div>
+                      )}
+                      </AnimatePresence>    
+                      </div>
+
+                        <div className='flex items-center gap-3 px-5 pb-5 pt-1
+                        flex-wrap'>
+
+                          {userRole==='admin'&&(
+                            <>
+                            <motion.button
+                            onClick={handleSave}
+                            whileTap={{scale:0.97}}
+                            disabled={saving || savedComponentId}
+                            className='flex items-center gap-2 px-4 py-2.5
+                            rounded-xl text-sm fomt-medium transition-all disabled:opacity-40
+                            disabled:cursor-not-allowed'
+                            style={{
+                              background:savedComponentId? "rgba(16,185,129,0.1)"
+                              :"rgba(255,255,255,0.06)",
+                              border:savedComponentId ?"1px solid rgba(16,185,129,0.3)"
+                              :"1px solid rgba(255,255,255,0.1)",
+                              color:savedComponentId?"#34d399":"fff",
+                            }}
+                            >
+
+                              {saving ? <motion.span
+                              animate={{rotate:360}}
+                              transition={{repeat:Infinity,duration:1
+                                ,ease:"linear"
+                              }} >
+                                <FiLoader size={14}/>
+                              </motion.span>:
+                              savedComponentId ? <FiCheckCircle size={14}/>:
+                                <FiSave size={14}/>
+                              }
+                              {saving? "Saving...":savedComponentId?"Saved":
+                              "Save Component"}
+
+                            </motion.button>
+
+                            {savedComponentId && !published && (
+                              <motion.button
+                              onClick={handlePublished}
+                              whileTap={{scale:0.97}}
+                              className='flex items-center gap-2 px-4 py-2.5 rounded-xl
+                              text-sm font-semibold transition-all disabled:opacity-40
+                              '
+                              style={{
+                                background:publishing?"rgba(6,182,212,0.2)":
+                                "linear-gradient(135deg,#06b6d4 0%, #0891b2 100%)",
+                                boxShadow: publishing ?"none" :" o  0 20px rgba(6,182,212,0.3)",
+                                color:"#fff",
+                              }}
+                              >
+
+                                {publishing ? <motion.span
+                              animate={{rotate:360}}
+                              transition={{repeat:Infinity,duration:1
+                                ,ease:"linear"
+                              }} >
+                                <FiLoader size={14}/>
+                              </motion.span>:
+                              <FiUploadCloud size={14}/>}
+                              {publishing? "Publishing...":
+                              "Publish to npm"}
+                              </motion.button>
+                            )}
+
+                            {published && (
+                              <motion.div
+                              initial={{opacity:0,scale:0.9}}
+                              animate={{opacity:1,scale:1}}
+                              className='flex items-center gap-2 px-4 py-2.5
+                              rounded-xl text-sm font-semibold'
+                              style={{background:"rgba(6,185,129,0.1)",
+                                border:"1px solid rgba(16,185,129,0.3)",
+                                color:"#34d399"
+                              }}
+                              >
+                                <FiCheckCircle size={14}/>
+                                Published
+                              </motion.div>
+                            )}
+                            {savedComponentId && (
+                              <motion.div
+                              initial={{opacity:0,x:-8}}
+                              animate={{opacity:1,x:0}}
+                              className='flex items-center gap-2 ml-auto'
+                              >
+                                <motion.div
+                                initial={{opacity:0,x:-8}}
+                                animate={{opacity:1,x:0}}
+                                className='flex items-center gap-2 ml-auto'
+                                >
+                                  <motion.button
+                                  onClick={()=>navigate("/")}
+                                  whileTap={{scale:0.97}}
+                                  className='flex items-center gap-2 px-4 py-2.5
+                                  rounded-xl text-sm font-medium transition-all'
+                                  style={{
+                                    background: "rgba(255,255,255,0.05",
+                                    border:"1px solid rgba(255,255,255,0.1)",
+                                    color:"rgba(255,255,255,0.5)"
+                                  }}
+                                  >
+                                    <FiArrowLeft size={14}/>Back
+                                  </motion.button>
+
+                                  <motion.button
+                                    onClick={()=>{
+                                      setPrompt("");
+                                      setGenerated(null)
+                                      setSavedComponentId(null)
+                                      setPublished(false)
+                                      setActiveTab("preview")
+                                  }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className='flex items-center gap-2 px-4 py-2.5
+                                            rounded-xl text-sm font-semibold transition-all'
+                                    style={{
+                                      background: "linear-gradient(135deg,#6366f1 0%, #4f46e5 100%)",
+                                      boxShadow: "0 0 20px rgba(99,102,241,0.3)",
+                                      color: " #fff"
+                                    }}
+                                  >
+                                    <FiRefreshCcw size={14}/> Generate New
+                                  </motion.button>
+                                </motion.div>
+                              </motion.div>
+                            )}
+                            </>
+                          )}
+
+                          {userRole==='user'&&(
+                            <>
+                             <motion.button 
+                             onClick={handleSave}
+                             whileTap={{scale:0.97}}
+                            disabled={saving || savedComponentId}
+                            className='flex items-center gap-2 px-4 py-2.5
+                            rounded-xl text-sm fomt-medium transition-all disabled:opacity-40
+                            disabled:cursor-not-allowed'
+                            style={{
+                              background:savedComponentId? "rgba(16,185,129,0.1)"
+                              :"rgba(255,255,255,0.06)",
+                              border:savedComponentId ?"1px solid rgba(16,185,129,0.3)"
+                              :"1px solid rgba(255,255,255,0.1)",
+                              color:savedComponentId?"#34d399":"fff",
+                            }}
+                            >
+
+                              {saving ? <motion.span
+                              animate={{rotate:360}}
+                              transition={{repeat:Infinity,duration:1
+                                ,ease:"linear"
+                              }} >
+                                <FiLoader size={14}/>
+                              </motion.span>:
+                              savedComponentId ? <FiCheckCircle size={14}/>:
+                                <FiSave size={14}/>
+                              }
+                              {saving? "Saving...":savedComponentId?"Saved":
+                              "Save Component"}
+
+                            </motion.button>
+
+                            {savedComponentId && (
+                              <motion.div
+                              initial={{opacity:0,x:-8}}
+                              animate={{opacity:1,x:0}}
+                              className='flex items-center gap-2 ml-auto'
+                              >
+                                <motion.div
+                                initial={{opacity:0,x:-8}}
+                                animate={{opacity:1,x:0}}
+                                className='flex items-center gap-2 ml-auto'
+                                >
+                                  <motion.button
+                                  onClick={()=>navigate("/")}
+                                  whileTap={{scale:0.97}}
+                                  className='flex items-center gap-2 px-4 py-2.5
+                                  rounded-xl text-sm font-medium transition-all'
+                                  style={{
+                                    background: "rgba(255,255,255,0.05",
+                                    border:"1px solid rgba(255,255,255,0.1)",
+                                    color:"rgba(255,255,255,0.5)"
+                                  }}
+                                  >
+                                    <FiArrowLeft size={14}/>Back
+                                  </motion.button>
+
+                                  <motion.button
+                                    onClick={()=>{
+                                      setPrompt("");
+                                      setGenerated(null)
+                                      setSavedComponentId(null)
+                                      setPublished(false)
+                                      setActiveTab("preview")
+                                  }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className='flex items-center gap-2 px-4 py-2.5
+                                            rounded-xl text-sm font-semibold transition-all'
+                                    style={{
+                                      background: "linear-gradient(135deg,#6366f1 0%, #4f46e5 100%)",
+                                      boxShadow: "0 0 20px rgba(99,102,241,0.3)",
+                                      color: " #fff"
+                                    }}
+                                  >
+                                    <FiRefreshCcw size={14}/> Generate New
+                                  </motion.button>
+
+                                  <motion.button
+                                  className='flex items-center gap-2 px-4 py-2.5
+                                            rounded-xl text-sm font-medium transition-all'
+                                            style={{background:"rgba(99,102,241,0.15)",
+                                              border:"1px solid rgba(99,102,241,0.3)",
+                                              color:"#818cf8"
+                                            }}
+
+                                  >
+                                    <FiPackage size={14}/>My Components
+
+                                  </motion.button>
+
+
+
+                                </motion.div>
+
+
+
+
+                              </motion.div>
+                            )}
+                            </>
+                          )}
+
+
+                        </div>
+
+
+
+
+                    </motion.div>
+                  )}
+                  </AnimatePresence>
+
+          
 
           {
             !generated && !generating &&(

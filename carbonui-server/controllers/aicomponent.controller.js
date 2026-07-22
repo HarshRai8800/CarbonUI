@@ -5,6 +5,8 @@ export const generateComponent = async(req,res)=>{
     try{
         const {prompt} = req.body;
 
+        console.log(prompt)
+
         const user = await User.findById(req.userId)
 
         if(!user){
@@ -13,10 +15,10 @@ export const generateComponent = async(req,res)=>{
 
         if(user.role=="user"){
 
-            if(user.aiCredits<50){
+            if(user.aicredits<50){
                 return res.status(400).json({message:"Not enough AI credits"})
             }
-            user.aiCredits -=50
+            user.aicredits -=50
             await user.save()
         }
 
@@ -105,11 +107,10 @@ export const generateComponent = async(req,res)=>{
 
             return res.status(200).json({
             parsed,
-            remainingCredits:user.role ==="user"?user.aiCredits :null,
+            remainingCredits:user.role ==="user"?user.aicredits :null,
             })
 
     }catch(error){
-        console.log(error);
         return res.status(500).json({message:error.message})
     }
 }

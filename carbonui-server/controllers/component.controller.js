@@ -2,12 +2,14 @@ import User from "../models/user.model.js";
 import Component from "../models/component.model.js"
 import path from "path";
 import fs from "fs";
-import execSync from "child_process";
+import {execSync} from "child_process";
 
 
 export const saveComponent = async (req,res)=>{
     try{
         const {name,code,props} = req.body;
+
+        console.log(name +" "+code +" "+props);
 
          const user = await User.findById(req.userId)
 
@@ -15,11 +17,12 @@ export const saveComponent = async (req,res)=>{
             return res.status(404).json({message:"User not found"})
         }
 
-        if(user.role==='admin'){
             const existing = await Component.findOne({
                 name,
                 owner:req.userId,
             })
+
+            console.log(existing)
 
             if(existing){
                 return res.status(400).json({
@@ -35,7 +38,6 @@ export const saveComponent = async (req,res)=>{
             })
 
             return res.status(200).json(component)
-        }
     }catch(error){
         return res.status(500).json({message:`failed to save component ${error}`})
     }
@@ -57,6 +59,8 @@ export const publishComponent  = async(req,res)=>{
              return res.status(404).
              json({message:"Component not found"})
         }
+
+        console.log(component +" "+req.userId)
 
         if(component.owner.toString() !==req.userId.toString()){
             return res.status(403).json({
@@ -87,7 +91,10 @@ export const publishComponent  = async(req,res)=>{
 
         let indexContent = fs.readFileSync(indexFile,"utf8");
 
-        const exportLine = `export {${component.name}} from "./components/${component.name}/${component.name}.jsx`
+        const exportLine = `export {${component.name}} from "./components/${component.name}/${component.name}.jsx";`
+        
+        console.log("exportLine:");
+        console.log(JSON.stringify(exportLine));
 
         if(!indexContent.includes(exportLine)){
             fs.appendFileSync(indexFile,`\n${exportLine}\n`);
@@ -109,6 +116,10 @@ export const publishComponent  = async(req,res)=>{
         // -------------------------------------------
         // BUILD LIBRARY
         // -------------------------------------------
+
+        console.log("========== index.js ==========");
+        console.log(fs.readFileSync(indexFile, "utf8"));
+        console.log("==============================");
 
         console.log("Building library...");
 
@@ -140,7 +151,7 @@ export const publishComponent  = async(req,res)=>{
         });
 
         component.visibility = "public"
-        component.npmPackage = "carbon-ui-library"
+        component.npmPackage = "carbon-ui-lib"
 
         await component.save()
 

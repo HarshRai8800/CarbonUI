@@ -54,7 +54,7 @@ function Home() {
     }
     
     const handleCopy = ()=>{
-      navigator.clipboard.writeText("npm install carbon-ui-library")
+      navigator.clipboard.writeText("npm install carbon-ui-lib")
       setCopied(true);
       setTimeout(()=>{setCopied(false)},2000)
     }
@@ -296,7 +296,7 @@ function Home() {
               sm:text-sm font-momo w-full max-w-xs sm:max-w-fit'>
                 <span className='text-[#3be8ff]/60'>$</span>
                 <span className='text-white/80 truncate'>
-                npm install carbon-ui-library
+                npm install carbon-ui-lib
                 </span>
                 <button onClick={handleCopy}
                 className='ml-1 text-white/30 hover:text-[#3be8ff]
