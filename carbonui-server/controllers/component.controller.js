@@ -164,3 +164,21 @@ export const publishComponent  = async(req,res)=>{
     }
 }
 
+export const getAllComponents = async(req,res)=>{
+    try {
+        const components = await Component.find().populate("owner","name email")
+        .sort({createdAt:-1});
+
+         if(!components){
+            return res.status(404).json({message:"Components are not found"});
+        }
+
+        return res.status(200)
+        .json(components)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500)
+        .json({message:`Failed to get all components ${error}`});
+    }
+}
+

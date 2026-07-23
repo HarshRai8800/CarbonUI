@@ -102,7 +102,7 @@ function Home() {
               </span>
             </div>
 
-            <div className='hidden md:flex items-center gap-6 
+            <div onClick={()=>navigate("/components")} className='hidden md:flex items-center gap-6 
             lg:gap-8 text-sm text-white/50'>
                 <button className='duration-200 px-6 py-2.5 border border-white/15
                 rounded-xl text-sm text-white/70 hover:text-white hover:border-white/25
@@ -150,7 +150,9 @@ function Home() {
 
 
                             <div className='py-1.5'>
-                              <button onClick={()=>setProfileOpen(!profileOpen)} 
+                              <button onClick={()=>{
+                              navigate("my-components")
+                              setProfileOpen(!profileOpen)}} 
                               className='w-full flex items-center gap-3 px-4 py-2.5 text-sm
                               text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors
                               cursor-pointer bg-transparent border-none text-left'>
