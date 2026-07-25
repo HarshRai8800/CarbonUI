@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Auth from "../components/Auth.jsx"
 import { useSelector } from 'react-redux'
 import { SiValorant } from "react-icons/si";
@@ -71,6 +71,12 @@ function Home() {
         setShowAuth(true)
       }
     }
+    useEffect(()=>{
+      console.log(userData?.role)
+      if(userData?.role==="admin"){
+        navigate("/admin")
+      }
+    },[userData])
 
 
   return (
@@ -151,7 +157,7 @@ function Home() {
 
                             <div className='py-1.5'>
                               <button onClick={()=>{
-                              navigate("my-components")
+                              navigate("/my-components")
                               setProfileOpen(!profileOpen)}} 
                               className='w-full flex items-center gap-3 px-4 py-2.5 text-sm
                               text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors
@@ -166,7 +172,7 @@ function Home() {
                                text-sm text-red-400/80 hover:text-red-400 hover:bg-red-500/[0.06]
                                transition-colors cursor-pointer bg-transparent border-none text-left'>
                                 <TbLayout size={16}/>
-                                logout
+                                LogOut
                               </button>
                             </div>
 
@@ -208,7 +214,7 @@ function Home() {
               backdrop-blur-md border-b border-white/[0.05] px-4 py-4 flex 
               flex-col gap-3'
               >
-                <button className='duration-200 px-6 py-2.5 border border-white/15
+                <button onClick={()=>navigate("/components")} className='duration-200 px-6 py-2.5 border border-white/15
                 rounded-xl text-sm text-white/70 hover:text-white hover:border-white/25
                 transition-all cursor-pointer bg-transparent w-full'>Components</button>
                   {userData?(
@@ -226,19 +232,21 @@ function Home() {
                     </div>
 
                     <button 
-                    onClick={()=>setMenuOpen(false)}
+                    onClick={()=>{
+                      navigate("/my-components")
+                      setMenuOpen(false)}}
                     className='flex items-center gap-2 text-sm text-white/60
                     hover:text-white transition-colors py-1 bg-transparent border-none
                     cursor-pointer text-left
                     '>
                        <TbComponents size={16} className='text-[#3be8ff]/70'/>
-                       Components
+                      My Components
                     </button>
                     <button onClick={()=>{handleLogOut();setMenuOpen(false);}} className='flex items-center gap-2 text-sm
                     text-red-400/80 hover:text-red-400 transition-colors py-1 bg-transparent border-none cursor-pointer
                     text-left'>
                       <TbLayout size={15}/>
-                        logout
+                        LogOut
                     </button>
                     </>
                   ):
@@ -318,6 +326,7 @@ function Home() {
             className='flex flex-col sm:flex-row justify-center gap-3 px-4
             sm:px-0'>
           <motion.button
+          onClick={()=>navigate("/components")}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.97 }}
           className='flex items-center justify-center gap-2 px-6 sm:px-7
@@ -517,6 +526,7 @@ function Home() {
 
                 <div className='flex flex-col sm:flex-row justify-center gap-3'>
                   <motion.div
+                  onClick={()=>navigate("/generate")}
                   whileHover={{y:-2,scale:1.02}}
                   whileTap={{scale:0.98}}
                   className='flex items-center justify-center gap-2 bg-[#3be8ff]
@@ -527,6 +537,7 @@ function Home() {
                   <HiSparkles size={15}/>Generate AI Components
                   </motion.div>
                   <motion.button
+                  onClick={()=>navigate("/my-components")}
                   whileHover={{y:-2}}
                   className='flex items-center justify-center gap-2 px-7 py-3.5 border 
                   border-white/15 rounded-xl text-sm text-white/60 hover:text-white
@@ -547,6 +558,7 @@ function Home() {
                   </p>
                   <div className='flex flex-col sm:flex-row justify-center gap-3'>
                   <motion.div
+                  onClick={()=>navigate("/components")}
                   whileHover={{y:-2,scale:1.02}}
                   whileTap={{scale:0.98}}
                   onClick={()=>setShowAuth(true)}

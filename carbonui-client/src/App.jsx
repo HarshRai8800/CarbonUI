@@ -32,7 +32,6 @@ function App() {
           dispatch(setUserData(res.data.user))
           setAuthChecked(true);
       }catch(err){
-        console.log(err);
         setAuthChecked(true);
         dispatch(setUserData(null))
       }
@@ -40,17 +39,18 @@ function App() {
     fetchUser();
   },[])
 
+
   useEffect(()=>{
+
     if(!userData)return 
 
     const fetchAllUsers = async()=>{
       try {
         const userRes = await axios.get(ServerUrl+"/api/user/all-users",{
           withCredentials:true})
-          dispatch(setAllComponents(userRes.data))
-          console.log(userRes.data)
+          console.log(userRes)
+          dispatch(setAllUsers(userRes.data))
       } catch (error) {
-        console.log(error)
         dispatch(setAllUsers(null))
       }
     }
@@ -60,9 +60,7 @@ function App() {
         const componentRes = await axios.get(ServerUrl+"/api/component/all-components",{
           withCredentials:true})
           dispatch(setAllComponents(componentRes.data))
-          console.log(componentRes.data)
       } catch (error) {
-        console.log(error)
         dispatch(setAllUsers(null))
       }
     }
@@ -87,7 +85,7 @@ function App() {
       <Route path='/' element={<Home/>} />
       <Route path='/generate' element={<Generate/>}/>
       <Route path='/admin' element={<AdminDashboard/>}/>
-      <Route path='/components' element={<AllComponents/>}/>
+      <Route path='/components' element={<AllComponent/>}/>
       <Route path='/my-components' element={<MyComponents/>}/>
       <Route path='/pricing' element={<Pricing/>}/>
     </Routes>
