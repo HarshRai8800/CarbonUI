@@ -1,13 +1,14 @@
 import axios from 'axios';
 import React, { useState } from 'react'
 import { SiValorant } from 'react-icons/si'
-import { TbLayout, TbLayoutDashboard, TbPackage, TbChevronLeft, TbMenu, TbPlus, TbUsers, TbCode, TbWorld, TbSearch } from "react-icons/tb"
+import { TbLayout, TbLayoutDashboard, TbPackage, TbChevronLeft, TbMenu, TbPlus, TbUsers, TbCode, TbWorld, TbSearch, TbBoxOff, TbX, TbCodeDots, TbEye } from "react-icons/tb"
 import { ServerUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { motion,AnimatePresence, color } from 'motion/react';
 import {Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
+import LiveComponentPreview from '../components/LiveComponentPreview';
 
 function CustomToolTip({active,payload,label}){
   if(!active || !payload?.length)return null;
@@ -20,20 +21,218 @@ function CustomToolTip({active,payload,label}){
   )
 }
 
+function PropsInput({props,setProps}){
+  const [input,setInput] = useState("");
+
+  const addProps =()=>{
+    const trimmed = input.trim()
+    if(trimmed && !props.includes(trimmed)){
+      setProps([...props,trimmed])
+    }
+    setInput("")
+  }
+  const removeProps=(p)=>{
+    setProps(props.filter((x)=>x !== p))
+  }
+  return (
+    <div>
+      <div className='flex flex-wrap gap-1.5 mb-2 min-h-[28px]'>
+
+        {props.map((p)=>(
+          <span key={p}
+          className='flex items-center gap-1 px-2.5 py-0.5 rounded-full
+          text-xs fot-semibold'
+          style={{background:"rgba(167,139,250,0.15",color:"#a78bfa",
+            border:"1px solid rgba(167,139,250,0.25)"
+          }}>
+            {p}
+            <button onClick={()=>removeProps(p)} className='ml=0.5 opacity-60 hover:opacity-100
+            transition-opacity bg-transparent border-none cursor-pointer p-0
+            leading-none'
+            style={{color:"#a78bfa"}}>
+              <TbX size={11}/>
+            </button>
+          </span>
+        ))}
+        {props.length===0 &&(
+          <span className='text-xs text-white/20 self-center'>
+            No props added yet
+          </span>
+        )}
+      </div>
+
+      <div className='flex gap-2'>
+        <input
+        value={input}
+        onKeyDown={(e)=>{
+         if (e.key === "Enter" || e.key === ","){
+            e.preventDefault();
+            addProps()
+          }
+        }}
+        
+        onChange={(e)=>setInput(e.target.value)}
+        placeholder='e.g. "title", "onClick", "children"'
+        className='flex flex-1 min-w-0 bg-white/[0.04] border border-white/10
+        rounded-xl px-3 py-2 text-sm text-white placeholder-white/20
+        outline-none focus:border-[#a78bfa]/50 transition-colors'/>
+          <button onClick={addProps} className='px-3 sm:px-4 py-2 rounded-xl text-sm 
+          font-semibold border-none cursor-pointer transition-all whitespace-nowrap'
+          style={{background:"rgba(167,139,250,0.15)",
+            color:"#a78bfa",
+            border:"1px solid rgba(167,139,250,0.25)"
+          }}>
+            Add
+          </button>
+      </div>
+      <p className='text-[10px] text-white/20 mt-1.5'>
+          Press <span className='px-1 py-0.5 rounded bg-white/5 text-white/40
+          text-[9px]'> Enter</span>or comma to add a prop
+          </p>
+    </div>
+  )
+}
+
+function AddComponentForm(){
+
+  const [name,setName] = useState("")
+  const [props,setProps] = useState([]);
+  const [code,setCode] = useState("");
+  const [codeTab,setCodeTab] = useState("code")
+
+  return (
+    <div className='px-4 sm:px-6 lg:px-8 py-5 sm:py-6 max-w-3xl w-full
+    mx-auto'>
+      <h2 className='text-base sm:text-lg fomt-bold mb-1'>
+        Add Component
+      </h2>
+      <p className='text-white/35 text-xs mb-5 sm:mb-6'>
+      Manually add a component - give it a name, define props, paste the 
+      code and preveiw it.
+      </p>
+
+      <div className='space-y-4 sm:space-y-5'>
+
+        <div className='p-3.5 sm:p-4 rounded-xl border border-white/[0.07]
+        bg-white/[0.02] space-y-2'>
+          <label htmlFor='name' className='text-xs font-semibold text-white/50
+          uppercase tracking-wider block'>
+            Component Name
+          </label>
+          <input type='text' id='name'
+          onChange={(e)=>setName(e.target.value)}
+          value={name}
+          placeholder='e.g. "PricingCard", "HeroSection"'
+          className='w-full bg-white/[0.04] border border-white/10 rounded-xl
+          px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none
+          focus:border-[#3be8ff]/40 transition-colors'
+          />
+        </div>
+        <div className='p-3.5 sm:p-4 rounded-xl border border-white/[0.07]
+        bg-white/[0.02] space-y-2'>
+            <label htmlFor="text" className='text-xs font-semibold text-white/50
+          uppercase tracking-wider block'>
+            Props
+          </label>
+          <PropsInput props={props} setProps={setProps}/>
+        </div>
+
+        <div className='rounded-2xl border border-white/[0.07] bg-white/[0.02]
+        overflow-hidden'>
+          <div className='flex item-center justify-between px-3.5 sm:px-4 py-3
+          border-b border-white/[0.06]'>
+            <label className='text-xs font-semibold text-white/50 uppercase tracking-wider'>
+            Component Code</label>
+            <div className='flex gap-1 rounded-xl p-1'
+            style={{background:"rgba(0,0,0,0.3)"}}>
+              {["code","preview"].map((tab)=>(
+                <button key={tab}
+                onClick={()=>setCodeTab(tab)}
+                className='flex item-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5
+                rounded-lg text-xs font-medium transition-all capitalize border-none
+                 cursor-pointer'
+                 style={{
+                  background: codeTab === tab ? "rgba(59,232,255,0.2)":"transparent",
+                  color:codeTab === tab ? "#3be8ff" : "rgba(255,255,255,0.4)",
+                 }}>
+                  {tab === "code" ? <TbCodeDots size={12}/>: <TbEye size={12}/>}
+                  <span className='hidden xs:inline'>{tab}</span>
+                </button>
+              ))}
+            </div>
+
+          </div>
+
+          <AnimatePresence mode='wait'
+         > {codeTab==="code"?(
+            <motion.div
+            initial={{opacity:0}}
+            animate={{opacity:1}}
+            exit={{opacity:0}}>
+             <textarea
+                onChange={(e) => setCode(e.target.value)}
+                value={code}
+                placeholder={`export default function MyComponent({ title }) {
+                return (
+                  <div>
+                    <h1>{title}</h1>
+                  </div>
+                );
+              }`}
+                className="w-full bg-[#0d1117] px-4 sm:px-5 py-4 text-xs
+                leading-relaxed text-green-300 font-mono resize-none
+                outline-none placeholder-white/10"
+                style={{ minHeight: 220 }}
+              />
+            </motion.div>
+         ):(
+          <motion.div
+          initial={{opacity:0}}
+          animate={{opacity:1}}
+          exit={{opacity:0}}
+          className='p-3.5 sm:p-4'>
+            {code.trim()?(
+                <LiveComponentPreview code={code}/>
+
+            ):(
+                <div
+                className='h-36 sm:h-40 flex items-center justify-center
+                text-white/20 text-sm rounded-xl'
+                style={{border:"1px dashed rgba(255,255,255,0.08)"}}                
+                >
+                  Paste some code first to see the preview
+                </div>
+            )}
+          
+
+
+          </motion.div>
+         )}
+
+          </AnimatePresence>
+
+        </div>
+
+      </div>
+
+    </div>
+  )
+}
+
 function AdminDashboard() {
   const [activeVeiw,setActiveVeiw] = useState("dashboard");
   const [sideBarOpen,setSideBarOpen] = useState(false);
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const {userData,allUsers,allComponents} = useSelector((s)=>s.user)
+  const [componentSearch,setComponentSearch] = useState("");
+  const publicComponents = allComponents?.filter((c)=>c.visibility === "public") || []
 
-  const publishComponent = allComponents?.filter((c)=>c.visibility === "public") || []
-console.log(allUsers,userData, allComponents)
 
   const stats = [
     {label:"Total Users" ,value: allUsers?.length || 0,icon:
       TbUsers, color : "#3be8ff"},
-    {label:"Component Made" ,value:publishComponent?.length||0 ,icon:
+    {label:"Component Made" ,value:publicComponents?.length||0 ,icon:
         TbCode,color:"#a78bfa"},
   ]
 
@@ -122,9 +321,9 @@ console.log(allUsers,userData, allComponents)
   }
 
   const chartData = (()=>{
-      if(!publishComponent)return[];
+      if(!publicComponents)return[];
       const map = {}
-      publishComponent.forEach((c)=>{
+      publicComponents.forEach((c)=>{
         const raw = c.createdAt;
         if(!raw) return ;
         const label = new Date(raw).
@@ -139,6 +338,14 @@ console.log(allUsers,userData, allComponents)
       .slice(-12);
 
   })();
+
+  const filterPublicComponents = componentSearch.trim()
+  ? publicComponents.filter((c)=>
+  c.name?.toLowerCase().includes(componentSearch.toLowerCase())||
+  c.props?.some((p)=>p.toLowerCase()
+  .includes(componentSearch.toLowerCase())))
+  :publicComponents;
+
 
 
   return (
@@ -395,21 +602,110 @@ console.log(allUsers,userData, allComponents)
                             </p>
 
                             <p className='text-white/35 text-[11px]'>
-                            {publishComponent.length} components visible to all Components
+                            {publicComponents.length} components visible to all Components
                             users
                             </p>
                           </div>
                         </div>
 
                         <div className='relative w-full sm:w-48'>
-                          <TbSearch size={13}/>
+                          <TbSearch size={13} className='absolute left-3 top-1/2 
+                          -translate-y-1/2 text-white/30 pointer-events-none'/>
+                          <input
+                          value={componentSearch}
+                          onChange={(e)=>setComponentSearch(e.target.value)}
+                          placeholder='Search Components...'
+                          className='w-full bg-white/[0.04] border border-white/10
+                          rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-white/25 outline-none 
+                          focus:border-[#3be8ff]/40 transition-colors'
+                          />
                         </div>
 
                       </div>
 
-                      <div>
+                        {filterPublicComponents.length === 0 ? (
+                          <div className='flex flex-col items-center justify-center py-14
+                          gap-3 text-white/20'>
+                            <TbBoxOff size={32}/>
+                            <p className='text-sm'>
+                              {componentSearch ? "No componens match your search":
+                              "No public components yet"}
+                            </p>
+                          </div>
+                        ):(
+                          <div className='divide-y divide-white/[0.04]'>
+                            {filterPublicComponents.map((c,i)=>(
+                              <motion.div key={i} className='flex items-start
+                              sm:items-center justify-between gap-3 px-4 sm:px-5 py-3.5
+                              hover:bg-white/[0.02] transition-colors'>
+                                <div className='flex items-start sm:items-center gap-3 
+                                min-w-0'>
+                                  <div className='w-8 h-8 rounded-xl flex items-center
+                                  justify-center flex-shrink-0 mt-0.5 sm:mt-0'
+                                  style={{background:"rgba(167,139,250,0.1)",
+                                    border:"1px solid rgba(167,139,250,0.2)"
+                                  }}
+                                  >
+                                    <TbCode size={14} style={{color:"#a78bfa"}}/>
+                                  </div>
 
-                      </div>
+                                  <div className='min-w-0'>
+                                    <p className='text-sm font-semibold text-white truncate'>
+                                      {c.name}
+                                    </p>
+                                    {c.props?.length>0 && (
+                                      <div className='flex flex-wrap gap-1 mt-1'>
+                                        {c.props.slice(0,4).map((p)=>(
+                                          <div key={p} className='px-1.5 py-0.5 rounded-md
+                                          text-[10px] font-medium'
+                                          style={{background:"rgba(167,139,250,0.1)",
+                                            color:"rgba(167,139,250,0.7)"
+                                          }}
+                                          >
+                                            {p}
+                                          </div>
+                                        ))}
+                                        {c.props?.length > 4 && (
+                                          <span className='px-1.5 py-0.5 rounded-md text-[10px]
+                                          text-white/25'>
+                                            +{c.props.length -4} more
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className='flex flex-col sm:flex-row items-end
+                                sm:items-center gap-2 flex-shrink-0'>
+                                  <span className='text-[11px] text-white/25 
+                                  whitespace-nowrap'>
+                                    {
+                                      new Date(c.createdAt).toLocaleDateString("en-US",
+                                        {
+                                          month:"short",day:"numeric",year:"numeric",
+                                        }
+                                      )
+                                    }
+                                  </span>
+                                  <span className='flex items-center gap-1 px-2 py-0.5 
+                                  rounded-full text-[10px] font-semibold
+                                  '
+                                  style={{background:"rgba(59,232,255,0.08)",
+                                    color:"#3be8ff",
+                                    border:"1px solid rgba(59,232,255,0.2)"
+                                  }}>
+                                    <TbWorld size={9}/>
+                                    Public
+                                  </span>
+                                </div>
+
+
+                              </motion.div>
+                            ))}
+
+                          </div>
+                        )}
 
 
 
@@ -417,7 +713,18 @@ console.log(allUsers,userData, allComponents)
             </motion.div>
           )}
 
+          {activeVeiw==='add'&&(
+            <motion.div
+            key="add"
+            initial={{opacity:0,y:10}}
+            animate={{opacity:1,y:0}}
+            exit={{opacity:0,y:-10}}
+            transition={{duration:0.25}}
+            >
+              <AddComponentForm/>
 
+            </motion.div>
+          )}
           
         </AnimatePresence>
 

@@ -15,7 +15,7 @@ const Toast = ({message,type,onClose})=>{
      initial={{opacity:0,y:-40}}
      animate={{opacity:1,y:0}}
      exit ={{opacity: 0,y:-40}}
-     className='fixed top-6 right-6 flex items-center gap-3 px-3
+     className='fixed top-6 right-6 flex items-center gap-3 px-6
      rounded-2xl shadow-2xl'
      style={{
       background:type === "success"?"#0d9f6e":type ==="error"?

@@ -11,3 +11,5 @@ export {ECommerceCard} from "./components/ECommerceCard/ECommerceCard.jsx";
 export {InputForm} from "./components/InputForm/InputForm.jsx";
 
 export {ToggleSwitch} from "./components/ToggleSwitch/ToggleSwitch.jsx";
+
+export {CardLoader} from "./components/CardLoader/CardLoader.jsx";
