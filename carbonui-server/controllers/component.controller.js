@@ -9,7 +9,6 @@ export const saveComponent = async (req,res)=>{
     try{
         const {name,code,props} = req.body;
 
-        console.log(name +" "+code +" "+props);
 
          const user = await User.findById(req.userId)
 
@@ -22,7 +21,6 @@ export const saveComponent = async (req,res)=>{
                 owner:req.userId,
             })
 
-            console.log(existing)
 
             if(existing){
                 return res.status(400).json({

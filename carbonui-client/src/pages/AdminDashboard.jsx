@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react'
 import { SiValorant } from 'react-icons/si'
-import { TbLayout, TbLayoutDashboard, TbPackage, TbChevronLeft, TbMenu, TbPlus, TbUsers, TbCode, TbWorld, TbSearch, TbBoxOff, TbX, TbCodeDots, TbEye } from "react-icons/tb"
+import { TbLayout, TbLayoutDashboard, TbPackage, TbChevronLeft, TbMenu, TbPlus, TbUsers, TbCode, TbWorld, TbSearch, TbBoxOff, TbX, TbCodeDots, TbEye, TbDeviceFloppy, TbLoader, TbTrash } from "react-icons/tb"
 import { ServerUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion,AnimatePresence, color } from 'motion/react';
 import {Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
 import LiveComponentPreview from '../components/LiveComponentPreview';
+import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 
 function CustomToolTip({active,payload,label}){
   if(!active || !payload?.length)return null;
@@ -20,7 +21,32 @@ function CustomToolTip({active,payload,label}){
     </div>
   )
 }
+const Toast = ({message,type,onClose})=>{
+  return (
+    <motion.div
+     initial={{opacity:0,y:-40}}
+     animate={{opacity:1,y:0}}
+     exit ={{opacity: 0,y:-40}}
+     className='fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3
+     rounded-2xl shadow-2xl'
+     style={{
+      background:type === "success"?"#0d9f6e":type ==="error"?
+      "#e02424":"#1c1c2e",
+      color:"#fff",
+      minWidth:"220px",
+     }}
+    >
 
+      {type === "success"?<FiCheckCircle size={18}/>:<FiAlertCircle size={18}/>}
+      <p className='text-sm font-medium'>{message}</p>
+      <button onClick={onClose} className='ml-auto text-white/60 
+      hover:text-white text-xs'>
+        <TbX size = {18}/>
+      </button>
+    </motion.div>
+
+  )
+}
 function PropsInput({props,setProps}){
   const [input,setInput] = useState("");
 
@@ -99,6 +125,59 @@ function AddComponentForm(){
   const [props,setProps] = useState([]);
   const [code,setCode] = useState("");
   const [codeTab,setCodeTab] = useState("code")
+  const [saving,setSaving] = useState(false)
+  const [publishing,setPublishing] = useState(false);
+  const [savedId,setSavedId] = useState(null)
+  const [isPublished,setIsPublished] = useState(false)
+  const [toast,setToast] = useState(null)
+  
+  const showToast = (message,type="info")=>{
+    setToast({message,type});
+    setTimeout(()=>setToast(null),3500);
+  }
+
+  const handleSave =async ()=>{
+    if(!name.trim() || !code.trim()){
+      showToast("Component name and code are required. ","error");
+      return;
+    }
+       setSaving(true)
+       try{
+        const res = await axios.post(ServerUrl + "/api/component/save",{
+          name,
+          code,
+          props
+        },{withCredentials:true})
+        console.log(res.data)
+        setSavedId(res.data._id)
+        showToast("Component saved successfully!","success");
+        setSaving(false)
+       }
+       catch(err){
+        console.log(err);
+        showToast("Component saved Error","error");
+        setSaving(false);
+       }
+    }
+
+    
+  const handlePublished = async()=>{
+    if(!savedId)return;
+    setPublishing(true)
+    try {
+      await axios.post(ServerUrl + "/api/component/publish",
+        {componentId:savedId},{withCredentials:true}
+      )
+      setIsPublished(true)
+      showToast("Published to npm successfully!","success");
+      setPublishing(false)
+    } catch (error) {
+      console.log(error)
+      setPublishing(false);
+      showToast("Published Failed!","error");
+    }
+  }
+
 
   return (
     <div className='px-4 sm:px-6 lg:px-8 py-5 sm:py-6 max-w-3xl w-full
@@ -212,6 +291,101 @@ function AddComponentForm(){
           </AnimatePresence>
 
         </div>
+        <div className='flex items-center gap-2 sm:gap-3 flex-wrap pt-1'>
+          <motion.button 
+          onClick={handleSave}
+          whileTap={{scale:0.97}}
+          disabled={saving || savedId}
+          className='flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-sm 
+          font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all border-none
+          cursor-pointer'
+          style={{
+            background:savedId?"rgba(16,185,129,0.12)":"rgba(59,232,255,0.12)",
+            color:savedId ? "#34d399":"#3be8ff",
+            border:`1px solid ${savedId ? "rgba(16,185,129,0.3)" :"rgba(59,232,255,0.25)"}`,
+          }}
+          >
+
+            {saving ? (
+              <motion.span animate={{rotate:360}} transition={{
+                repeat:Infinity,duration:1 ,ease:"linear"}}>
+                  <TbDeviceFloppy size={18}/>
+              </motion.span>
+            ):(
+              <TbDeviceFloppy size={18}/>
+            )}
+
+            {saving?"Saving ...":savedId ? "Saved ✔":"Saved Component"}
+
+          </motion.button>
+          <AnimatePresence>
+            {
+              savedId && !isPublished &&(
+                <motion.button
+                onClick={handlePublished}
+                initial={{opacity:0,x:-8}}
+                animate={{opacity:1,x:0}}
+                exit={{opacity:0,x:-8}}
+                whileTap={{scale:0.97}}
+                disabled={publishing}
+                className='flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-sm 
+                font-semibold disabled:opacity-40 transition-all border-none
+                cursor-pointer'
+                style={{
+                  background:"linear-gradient(135deg,#06b6d4 0%, #0891b2 100%",
+                  boxShadow:publishing?"none":"0 0 20px rgba(6,182,212,0.25)",
+                  color:"#fff"
+                }}
+                >
+                  {saving ? (
+                  <motion.span animate={{rotate:360}} transition={{
+                    repeat:Infinity,duration:1 ,ease:"linear"}}>
+                      <TbLoader size={18}/>
+                  </motion.span>
+                ):(
+                  <TbLoader size={18}/>
+                )}
+
+                {publishing?"Publishing ...":"Publish to npm"}
+                </motion.button>
+              )
+            }
+            {isPublished &&(
+              <motion.div
+              initial={{opacity:0,scale:0.9}}
+              animate={{opacity:1,scale:1}}
+              className='ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl
+              text-xs font-semibold'
+              style={{background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",
+                color:"#34d399"}}>
+                  ✔ Published
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {(savedId || name || code) && (
+            <button
+              onClick={()=>{
+                setName(""),
+                setProps([]);
+                setCode("")
+                setSavedId(null); 
+                setIsPublished(false); 
+                setCodeTab("code");
+              }}
+              className='ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs
+              text-white/30 hover:text-white/60 transition-all bg-transparent border-none 
+              cursor-pointer'
+            >
+              <TbTrash size={13}/>
+                Reset
+            </button>
+          )}
+        </div>
+  
+            <AnimatePresence>
+              {toast&&(<Toast message={toast.message} type={toast.type}
+              onClose ={()=>setToast(null)}/>)}
+            </AnimatePresence>      
 
       </div>
 
