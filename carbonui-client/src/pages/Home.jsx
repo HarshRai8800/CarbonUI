@@ -11,7 +11,7 @@ import {
   TbMenu
 } from "react-icons/tb"
 import { ServerUrl } from '../App.jsx';
-import { setUserData } from '../redux/userSlice.js';
+import { setAllComponents, setAllUsers, setUserData } from '../redux/userSlice.js';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
@@ -47,6 +47,8 @@ function Home() {
         await axios.get(ServerUrl+"/api/auth/logout",
           {withCredentials:true})
           dispatch(setUserData(null))
+          dispatch(setAllUsers([]))
+          dispatch(setAllComponents([]))
       }catch(err){
           console.log(err)
       }
@@ -108,9 +110,11 @@ function Home() {
               </span>
             </div>
 
-            <div onClick={()=>navigate("/components")} className='hidden md:flex items-center gap-6 
+            <div  className='hidden md:flex items-center gap-6 
             lg:gap-8 text-sm text-white/50'>
-                <button className='duration-200 px-6 py-2.5 border border-white/15
+                <button 
+                onClick={()=>navigate("/components")}
+                className='duration-200 px-6 py-2.5 border border-white/15
                 rounded-xl text-sm text-white/70 hover:text-white hover:border-white/25
                 transition-all cursor-pointer bg-transparent w-full'>
                 components </button>
