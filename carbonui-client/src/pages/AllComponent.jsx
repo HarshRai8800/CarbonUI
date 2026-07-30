@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import {useNavigate} from "react-router-dom"
 import {AnimatePresence,motion} from "motion/react"
 import LiveComponentPreview from '../components/LiveComponentPreview';
-
+import { HiSparkles } from "react-icons/hi2";
 
 function CopyBtn({text}){
 
@@ -311,12 +311,25 @@ function DetailPanel({component,onBack}){
               )
             }
 
-            <div>
+            <div >
               <p className='text-xs font-semibold text-white/50 
               mb-3 flex items-center gap-2'>
-                <TbBrandNpm size={13}/> Install
+                <TbBrandNpm size={13}/> Install</p>
                 <CodeBlock code={`npm install carbon-ui-lib`} lang={'bash'}/>
-              </p>
+            </div>
+
+            <div >
+              <p className='text-xs font-semibold text-white/50 
+              mb-3 flex items-center gap-2'>
+                <TbCode size={13}/> Import</p>
+                <CodeBlock code={importCode} lang={'jsx'}/>
+            </div>
+
+            <div >
+              <p className='text-xs font-semibold text-white/50 
+              mb-3 flex items-center gap-2'>
+                <HiSparkles size={13}/> Usage in App.jsx</p>
+                <CodeBlock code={usageCode} lang={'jsx'}/>
             </div>
 
 
