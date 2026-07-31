@@ -48,7 +48,6 @@ function App() {
       try {
         const userRes = await axios.get(ServerUrl+"/api/user/all-users",{
           withCredentials:true})
-          console.log(userRes)
           dispatch(setAllUsers(userRes.data))
       } catch (error) {
         dispatch(setAllUsers(null))
