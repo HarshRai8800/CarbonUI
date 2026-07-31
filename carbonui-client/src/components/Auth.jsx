@@ -29,24 +29,35 @@ function Auth({onClose}) {
 
     },[])
 
-    const googleAuth = async()=>{
-        try{
-            const response = await signInWithPopup(auth,provider);
-            let User = response.user;
-            let name = User.displayName;
-            let email = User.email;
-            
-            const result = await axios.post(ServerUrl+"/api/auth/google",{
-                name,email},{withCredentials:true});
-            console.log(result.data)
+   const googleAuth = async () => {
+    try {
+        const response = await signInWithPopup(auth, provider);
 
-                dispatch(setUserData(result.data))
-                onClose()
+        const { displayName, email } = response.user;
+
+        const result = await axios.post(
+            ServerUrl + "/api/auth/google",
+            {
+                name: displayName,
+                email,
+            },
+            {
+                withCredentials: true,
+                validateStatus: () => true,
+            }
+        );
+
+        console.log("Status:", result.status);
+        console.log("Data:", result.data);
+
+        if (result.status === 200) {
+            dispatch(setUserData(result.data));
+            onClose();
         }
-        catch(err){
-            console.log(err);
-        }
+    } catch (err) {
+        console.log(err);
     }
+};
 
   return (
     <AnimatePresence>
