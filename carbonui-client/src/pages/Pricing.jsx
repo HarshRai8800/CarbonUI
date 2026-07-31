@@ -1,8 +1,11 @@
 import React from 'react'
 import {AnimatePresence,motion} from "motion/react"
 import {useNavigate} from "react-router-dom"
-
+import axios from "axios"
 import { FiArrowLeft, FiCheck, FiLock, FiZap } from "react-icons/fi"
+import { ServerUrl } from '../App.jsx';
+import { setUserData } from '../redux/userSlice.js'
+import { useDispatch } from 'react-redux'
 
 
 
@@ -47,6 +50,56 @@ const plans=[
 
 function Pricing() {
   const navigate = useNavigate()
+  const dispatch = useDispatch();
+
+  const handlePayment = async(plan)=>{
+    try {
+      
+      const amount = plan.amount
+
+      const result  = await axios.post(ServerUrl+"/api/payment/create",
+        {
+          amount,aiCredits:plan.aiCredits
+        },{withCredentials:true}
+      )
+
+      const options ={
+        key:import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount:result.data.amount,
+        currency:"INR",
+        name:"Carbon.UI",
+        description:`${plan.name} - ${plan.aiCredits} Credits`,
+        order_id:result.data.id,
+
+          handler :async function (response) {
+
+            const verifyPay = await axios.post(ServerUrl +"/api/payment/verify",
+              response,{withCredentials:true})
+
+              console.log(verifyPay.data)
+              dispatch(setUserData(verifyPay.data.user))
+              alert("Payment Successful 🎉 AiCredits Added!");
+              navigate("/generate")
+            
+          },
+
+          theme:{
+            color:'#34079C',
+          }
+      }
+
+    
+
+      const rzp = new window.Razorpay(options);
+      rzp.open()
+
+
+    } catch (error) {
+      
+    }
+  }
+
+
   return (
     
     <div className='min-h-screen text-white relative overflow-hidden
@@ -221,7 +274,10 @@ function Pricing() {
                   ))}
               </ul>
 
-              <button className='w-full py-3 rounded-xl text-sm 
+              <button 
+              disabled={plan.disabled}
+              onClick={()=>handlePayment(plan)}
+              className='w-full py-3 rounded-xl text-sm 
               font-semibold transition-all'
               style={{
                 cursor:plan.disabled ?"not-allowed":"pointer",
