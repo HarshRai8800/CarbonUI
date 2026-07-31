@@ -19,12 +19,18 @@ export const googleAuth = async(req,res)=>{
             maxAge:7*24*60*60*1000
         })
 
-        cosole.log( "user:  "+user)
+        console.log( "user:  "+user)
 
         return res.status(200).json(user);
 
     }catch(err){
-        return res.status(500).json({message:`google Auth error ${err}`});  
+        catch (err) {
+        console.error("Google Auth Error:", err);
+
+        return res.status(500).json({
+        message: err.message
+    });
+} 
     }
 }
 
