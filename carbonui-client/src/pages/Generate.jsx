@@ -611,14 +611,13 @@ function Generate() {
                                   </motion.button>
 
                                   <motion.button
-                  
                                   className='flex items-center gap-2 px-4 py-2.5
                                             rounded-xl text-sm font-medium transition-all'
                                             style={{background:"rgba(99,102,241,0.15)",
                                               border:"1px solid rgba(99,102,241,0.3)",
                                               color:"#818cf8"
                                             }}
-
+                                    onClick={() => navigate("/my-components")}
                                   >
                                     <FiPackage size={14}/>My Components
 
