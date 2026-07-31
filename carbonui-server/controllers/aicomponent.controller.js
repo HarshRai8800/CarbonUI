@@ -104,6 +104,7 @@ export const generateComponent = async(req,res)=>{
             message:"AI returned invalid JSON"
             })
             }
+            console.log(parsed)
 
             return res.status(200).json({
             parsed,
@@ -111,6 +112,7 @@ export const generateComponent = async(req,res)=>{
             })
 
     }catch(error){
+        console.log(error)
         return res.status(500).json({message:error.message})
     }
 }
