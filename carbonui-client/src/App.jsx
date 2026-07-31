@@ -29,6 +29,7 @@ function App() {
       try{
         const res = await axios.get(ServerUrl+"/api/user/current-user",
           {withCredentials:true})
+        console.log(res.data)
           dispatch(setUserData(res.data.user))
           setAuthChecked(true);
       }catch(err){
@@ -58,6 +59,7 @@ function App() {
       try {
         const componentRes = await axios.get(ServerUrl+"/api/component/all-components",{
           withCredentials:true})
+         console.log(componentRes.data)
           dispatch(setAllComponents(componentRes.data))
       } catch (error) {
         dispatch(setAllUsers(null))
