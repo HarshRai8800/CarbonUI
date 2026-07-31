@@ -6,6 +6,7 @@ export const getCurrentUser = async(req,res)=>{
         if(!user){
             return res.status(404).json({message:"Failed to get Current User"});
         }
+        console.log(user)
         return res.status(200).json({user});
 
     } catch (error) {
@@ -19,6 +20,8 @@ export const getAllUsers = async(req,res)=>{
         if(!users){
             return res.status(404).json({message:"Users are not found"});
         }
+
+        console.log(users)
 
         return res.status(200).json(users);
     } catch (error) {
