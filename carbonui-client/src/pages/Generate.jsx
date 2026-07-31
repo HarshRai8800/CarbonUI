@@ -611,7 +611,7 @@ function Generate() {
                                   </motion.button>
 
                                   <motion.button
-                                  onClick={()=>navigate("/my-components")}
+                                  {/* onClick={()=>navigate("/my-components")} */}
                                   className='flex items-center gap-2 px-4 py-2.5
                                             rounded-xl text-sm font-medium transition-all'
                                             style={{background:"rgba(99,102,241,0.15)",
