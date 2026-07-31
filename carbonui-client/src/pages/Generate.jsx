@@ -187,7 +187,7 @@ function Generate() {
               </h2>
 
               <p className='text-white/40 text-base max-w-md mx-auto'>
-              Describe your React component in pain English. Preview, save, and publish
+              Describe your React component in plain English. Preview, save, and publish
               - all in one place.
               </p>
             </motion.div>
@@ -413,14 +413,14 @@ function Generate() {
                             whileTap={{scale:0.97}}
                             disabled={saving || savedComponentId}
                             className='flex items-center gap-2 px-4 py-2.5
-                            rounded-xl text-sm fomt-medium transition-all disabled:opacity-40
+                            rounded-xl text-sm font-medium transition-all disabled:opacity-40
                             disabled:cursor-not-allowed'
                             style={{
                               background:savedComponentId? "rgba(16,185,129,0.1)"
                               :"rgba(255,255,255,0.06)",
                               border:savedComponentId ?"1px solid rgba(16,185,129,0.3)"
                               :"1px solid rgba(255,255,255,0.1)",
-                              color:savedComponentId?"#34d399":"fff",
+                              color:savedComponentId?"#34d399":"#fff",
                             }}
                             >
 
@@ -499,7 +499,7 @@ function Generate() {
                                   className='flex items-center gap-2 px-4 py-2.5
                                   rounded-xl text-sm font-medium transition-all'
                                   style={{
-                                    background: "rgba(255,255,255,0.05",
+                                    background: "rgba(255,255,255,0.05)",
                                     border:"1px solid rgba(255,255,255,0.1)",
                                     color:"rgba(255,255,255,0.5)"
                                   }}
@@ -539,14 +539,14 @@ function Generate() {
                              whileTap={{scale:0.97}}
                             disabled={saving || savedComponentId}
                             className='flex items-center gap-2 px-4 py-2.5
-                            rounded-xl text-sm fomt-medium transition-all disabled:opacity-40
+                            rounded-xl text-sm font-medium transition-all disabled:opacity-40
                             disabled:cursor-not-allowed'
                             style={{
                               background:savedComponentId? "rgba(16,185,129,0.1)"
                               :"rgba(255,255,255,0.06)",
                               border:savedComponentId ?"1px solid rgba(16,185,129,0.3)"
                               :"1px solid rgba(255,255,255,0.1)",
-                              color:savedComponentId?"#34d399":"fff",
+                              color:savedComponentId?"#34d399":"#fff",
                             }}
                             >
 
@@ -582,7 +582,7 @@ function Generate() {
                                   className='flex items-center gap-2 px-4 py-2.5
                                   rounded-xl text-sm font-medium transition-all'
                                   style={{
-                                    background: "rgba(255,255,255,0.05",
+                                    background: "rgba(255,255,255,0.05)",
                                     border:"1px solid rgba(255,255,255,0.1)",
                                     color:"rgba(255,255,255,0.5)"
                                   }}
@@ -611,7 +611,7 @@ function Generate() {
                                   </motion.button>
 
                                   <motion.button
-                                  onClick={navigate("/my-components")}
+                                  onClick={()=>navigate("/my-components")}
                                   className='flex items-center gap-2 px-4 py-2.5
                                             rounded-xl text-sm font-medium transition-all'
                                             style={{background:"rgba(99,102,241,0.15)",
@@ -684,7 +684,7 @@ function Generate() {
                 className='w-12 h-12 rounded-full border-2 border-transparent mx-auto mb-4'
               />
               <p className='text-white/30 text-sm'>
-              AI is creafting your component
+             AI is crafting your component
               </p>
 
 
