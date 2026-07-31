@@ -15,7 +15,7 @@ import { useState } from 'react';
 
 
 
-export const ServerUrl = "http://localhost:8000";
+export const ServerUrl = "https://carbonui.onrender.com";
 
 
 function App() {
