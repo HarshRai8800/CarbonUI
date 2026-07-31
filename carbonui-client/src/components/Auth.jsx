@@ -38,6 +38,7 @@ function Auth({onClose}) {
             
             const result = await axios.post(ServerUrl+"/api/auth/google",{
                 name,email},{withCredentials:true});
+            console.log(result.data)
 
                 dispatch(setUserData(result.data))
                 onClose()
