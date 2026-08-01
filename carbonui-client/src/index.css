@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Racing+Sans+One&family=Syne:wght@400..800&display=swap');
 @import "tailwindcss";
 
+*{
+    font-family: "DM Sans", sans-serif;
+}
 ::-webkit-scrollbar {
   display: none;
 }
