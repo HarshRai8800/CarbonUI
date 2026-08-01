@@ -6,10 +6,10 @@ import { ServerUrl } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
-import { motion,AnimatePresence, color } from 'motion/react';
+import { motion,AnimatePresence } from 'motion/react';
 import {Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
 import LiveComponentPreview from '../components/LiveComponentPreview';
-import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiAlertCircle, FiCheckCircle, FiUploadCloud } from 'react-icons/fi';
 
 function CustomToolTip({active,payload,label}){
   if(!active || !payload?.length)return null;
@@ -143,6 +143,8 @@ function AddComponentForm(){
     }
        setSaving(true)
        try{
+        console.log(name , code)
+        console.log(props)
         const res = await axios.post(ServerUrl + "/api/component/save",{
           name,
           code,
@@ -337,13 +339,13 @@ function AddComponentForm(){
                   color:"#fff"
                 }}
                 >
-                  {saving ? (
+                  {publishing ? (
                   <motion.span animate={{rotate:360}} transition={{
                     repeat:Infinity,duration:1 ,ease:"linear"}}>
                       <TbLoader size={18}/>
                   </motion.span>
                 ):(
-                  <TbLoader size={18}/>
+                   <FiUploadCloud size={14}/>
                 )}
 
                 {publishing?"Publishing ...":"Publish to npm"}
