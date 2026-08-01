@@ -99,14 +99,13 @@ function Pricing() {
     }
   }
 
-
   return (
     
     <div className='min-h-screen text-white relative overflow-hidden
     flex flex-col'
     style={{
       background:"linear-gradient(135deg, #0a0a1a 0%,#0d0d28 60%,#0a1628 100%)",
-      fontFamily:"'DM Sans', sans-serif",
+      fontFamily:"'DM',syne-serif"
     }}
     >    
       <div className='absolute inset-0 pointer-events-none opacity-[0.07]'
@@ -158,14 +157,15 @@ function Pricing() {
           </div>
 
           <h1 className='text-4xl sm:text-5xl font-extrabold mb-3'
-          style={{fontFamily:"`Syne`,sans-serif",
+          style={{fontFamily:"'Syne',sans-serif",
             letterSpacing:"0.03em"
           }}>
             Simple{" "}
             <span style={{
               background:"linear-gradient(135deg,#818cf8 0%, #06b6d4 100%)",
               WebkitBackgroundClip:"text",
-              WebkitTextFillColor:"transparent"
+              WebkitTextFillColor:"transparent",
+              fontFamily:"'Syne',sans-serif",
             }}>
               Pricing
             </span>
